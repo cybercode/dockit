@@ -11,13 +11,13 @@
 #+EXCLUDE_TAGS: noexport
 
 * Dockit
-=Dockit= is an alternative composer for docker projects. It's (IMHO) advantage
+~Dockit~ is an alternative composer for docker projects. It's (IMHO) advantage
 is that it is scriptable, and rather than a single yaml configuration file,
-each service has it's own configuration file (=Dockit.yaml=), as well as an
-optional =Dockit.rb= which can provide scriptable configuration (as =Thor=
+each service has it's own configuration file (~Dockit.yaml~), as well as an
+optional ~Dockit.rb~ which can provide scriptable configuration (as ~Thor~
 subcommands) for any phase of the build and deploy process.
 
-=Dockit= is built on the [[https://github.com/erikhuda/thor][=Thor=]] cli and the [[https://github.com/swipely/docker-api][=docker-api=]] libraries.
+~Dockit~ is built on the [[https://github.com/erikhuda/thor][Thor]] cli and the [[https://github.com/swipely/docker-api][docker-api]] libraries.
 
 ** Installation
 #+BEGIN_SRC sh
@@ -26,21 +26,21 @@ subcommands) for any phase of the build and deploy process.
 ** Usage
 1. Create a top level deployment directory
 2. Create a sub-directory for each service
-3. Create a =Dockit.yaml= for each service
-4. Optionally, create a top level =Dockit.rb= subcommand file to orchestrate the
+3. Create a ~Dockit.yaml~ for each service
+4. Optionally, create a top level ~Dockit.rb~ subcommand file to orchestrate the
    build and deployment of the services.
-5. run =dockit= in the root directory for help.
+5. run ~dockit~ in the root directory for help.
 ** Development
-After checking out the repo, run `bin/setup` to install dependencies. Then,
-run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run ~bin/setup~ to install dependencies. Then,
+run ~bin/console~ for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake
-install`. To release a new version, update the version number in `version.rb`,
-and then run `bundle exec rake release` to create a git tag for the version,
-push git commits and tags, and push the `.gem` file to [[https://rubygems.org][rubygems.org]].
+To install this gem onto your local machine, run ~bundle exec rake
+install~. To release a new version, update the version number in ~version.rb~,
+and then run ~bundle exec rake release~ to create a git tag for the version,
+push git commits and tags, and push the ~.gem~ file to [[https://rubygems.org][rubygems.org]].
 ** Contributing
 1. Fork it ( https://github.com/cybercode/dockit/fork )
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
+2. Create your feature branch (~git checkout -b my-new-feature~)
+3. Commit your changes (~git commit -am [comment]~)
+4. Push to the branch (~git push origin my-new-feature~)
 5. Create a new Pull Request
