@@ -14,16 +14,10 @@ module Dockit
     # file   - dockit yaml file
     # locals - hash of local variables
     def initialize(file, locals={})
-      Dotenv.load(*ENVFILES.collect { |f| File.join(Dockit::Env.root, '.env') })
+      root = Dockit::Env.new.root
+      Dotenv.load(*ENVFILES.collect { |f| File.join(root, '.env') })
+      locals['root'] ||= root
 
-      locals['root'] ||= Dockit::Env.root
-      locals.each do |k,v|
-        if v.nil?
-          STDERR.puts "Local #{k} is nil!",
-                      "Did you forget --locals k:value, or the evironment variable?"
-          exit 1
-        end
-      end
       begin
         @config = YAML::load(ERB.new(File.read(file)).result(bindings(locals)))
       rescue NameError => e

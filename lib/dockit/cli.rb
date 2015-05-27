@@ -3,6 +3,7 @@ require 'dockit'
 
 class SubCommand < Thor
   no_commands do
+    # invoke command against the Dockit.yaml for the given service.
     def invoke_default(service=nil, cmd: nil, opts: {})
       service  ||= self.class.to_s.downcase
       cmd ||= current_command_chain[-1]
@@ -11,11 +12,12 @@ class SubCommand < Thor
       instance_variable_get('@_invocations')[Default].slice!(-1)
     end
 
+    # invoke the method in the Dockit.rb for the given service.
     def invoke_service(service, cmd: nil, opts: {})
       cmd ||= current_command_chain[-1]
       cmd = "#{service}:#{cmd}"
 
-      say "Invoking #{cmd}", :green
+      say "Invoking #{cmd}"
       invoke cmd, options.merge(opts)
       instance_variable_get('@_invocations')[Default].slice!(-1)
     end
@@ -38,13 +40,6 @@ class Default < Thor
     super
     ENV['DOCKER_HOST'] = options.host
     puts "Running from #{dockit.root}"
-    rootfile = File.join(dockit.root, 'Dockit.rb')
-    dockit.modules.each do |k, v|
-      k = 'all' if v.to_s == rootfile
-      require v
-      self.class.desc k, "#{k} submodule, see 'help #{k}'"
-      self.class.subcommand k, Module.const_get(k.capitalize)
-    end
   end
 
   no_commands do
@@ -157,7 +152,7 @@ class Default < Thor
   def exec(service)
     file = _file(service)
     if file != DOCKIT_FILE
-      say "Processing #{service}", :green
+      say "Processing #{service}"
       # problem w/ path length for docker build, so change to local directory
       Dir.chdir(File.dirname(file))
     end
@@ -175,4 +170,20 @@ class Default < Thor
     help
     exit
   end
+end
+
+# Add digital ocean support if droplet_kit is installed
+begin
+  require 'dockit/digitalocean'
+  Default.desc 'do', 'manage docker server'
+  Default.subcommand 'do', DO
+rescue LoadError
+end
+
+# it would be nice to do this in the initialization method of the Default
+# class above, but it hasn't been instantiated yet when invoking a subcommand.
+Dockit::Env.new.modules.each do |k, v|
+  require v
+  Default.desc k, "#{k} submodule, see 'help #{k}'"
+  Default.subcommand k, Module.const_get(k.capitalize)
 end

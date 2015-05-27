@@ -19,6 +19,14 @@ module Dockit
     attr_reader :services
     attr_reader :modules
 
+    def initialize(root: nil, debug: false)
+      @root         = root      # must be first!
+      @modules      = find_subcommands
+      @services     = find_services
+
+      Docker.logger = Dockit:: Log.new if debug
+    end
+
     def root
       return @root if @root
       @root = dir = Dir.pwd
@@ -30,23 +38,16 @@ module Dockit
       @root
     end
 
-    def initialize(debug: false, root: nil)
-      @modules      = find_subcommands
-      @services     = find_services
-      @root         = root
-      Docker.logger = Dockit:: Log.new if debug
-    end
-
     def find_services
-      _find_relative("**/Dockit.yaml")
+      find_relative("**/Dockit.yaml")
     end
 
     def find_subcommands
-      _find_relative('**/Dockit.rb')
+      fix_root_module(find_relative('**/Dockit.rb'))
     end
 
     private
-    def _find_relative(path)
+    def find_relative(path)
       Pathname.glob("#{root}/#{path}").inject({}) do |memo, path|
         name       = path.dirname.relative_path_from(Pathname.new(self.root)).to_s
         name       = path.dirname.basename.to_s if name == '.'
@@ -54,6 +55,13 @@ module Dockit
 
         memo
       end
+    end
+
+    def fix_root_module(modules)
+      if File.exists?(File.join(root, 'Dockit.rb'))
+        modules['all'] = modules.delete(File.basename(root))
+      end
+      modules
     end
   end
 end
