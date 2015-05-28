@@ -16,13 +16,15 @@ module Dockit
   end
 
   class Env
+    BASENAME = 'Dockit'.freeze
+
     attr_reader :services
     attr_reader :modules
+    attr_reader :depth
 
-    def initialize(root: nil, debug: false)
-      @root         = root      # must be first!
-      @modules      = find_subcommands
-      @services     = find_services
+    def initialize(depth: 2, debug: false)
+      @modules  = find_subcommands(depth)
+      @services = find_services(depth)
 
       Docker.logger = Dockit:: Log.new if debug
     end
@@ -32,29 +34,34 @@ module Dockit
       @root = dir = Dir.pwd
       begin
         dir = File.dirname(dir)
-        return @root = dir if File.exists?(File.join(dir, 'Dockit.rb'))
+        return @root = dir if File.exists?(File.join(dir, "#{BASENAME}.rb"))
       end while dir != '/'
 
       @root
     end
 
-    def find_services
-      find_relative("**/Dockit.yaml")
+    def find_services(depth)
+      find_relative(depth, 'yaml')
     end
 
-    def find_subcommands
-      fix_root_module(find_relative('**/Dockit.rb'))
+    def find_subcommands(depth)
+      fix_root_module(find_relative(depth, 'rb'))
     end
 
     private
-    def find_relative(path)
-      Pathname.glob("#{root}/#{path}").inject({}) do |memo, path|
-        name       = path.dirname.relative_path_from(Pathname.new(self.root)).to_s
-        name       = path.dirname.basename.to_s if name == '.'
-        memo[name] = path
+    def find_relative(depth, ext)
+      memo = {}
+      (0..depth).each do |i|
+        pat = File.join(root, ['*'] * i, "#{BASENAME}.#{ext}")
+        Pathname.glob(pat).inject(memo) do |memo, path|
+          name       = path.dirname.relative_path_from(Pathname.new(root)).to_s
+          name       = path.dirname.basename.to_s if name == '.'
+          memo[name] = path.to_s
 
-        memo
+          memo
+        end
       end
+      memo
     end
 
     def fix_root_module(modules)

@@ -35,11 +35,10 @@ class Default < Thor
   class_option :locals, type: :hash, aliases: ['l'],
                banner: "key:value [key:value ...]",
                desc: "variables to pass to yaml file."
-
   def initialize(*args)
     super
     ENV['DOCKER_HOST'] = options.host
-    puts "Running from #{dockit.root}"
+    puts "Project root: #{dockit.root}"
   end
 
   no_commands do
@@ -183,7 +182,11 @@ end
 # it would be nice to do this in the initialization method of the Default
 # class above, but it hasn't been instantiated yet when invoking a subcommand.
 Dockit::Env.new.modules.each do |k, v|
-  require v
-  Default.desc k, "#{k} submodule, see 'help #{k}'"
-  Default.subcommand k, Module.const_get(k.capitalize)
+  begin
+    require v
+    Default.desc k, "#{k} submodule, see 'help #{k}'"
+    Default.subcommand k, Module.const_get(k.capitalize)
+  rescue NameError => e
+    STDERR.puts "Can't load #{v}: #{e}"
+  end
 end
