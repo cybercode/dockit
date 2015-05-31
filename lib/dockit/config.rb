@@ -8,14 +8,14 @@ require 'dotenv'
 
 module Dockit
   class Config
-    ENVFILES=%w[.env .localenv]
+    ENVFILE='.env'
     # Instantiate and parse the file.
     #
     # file   - dockit yaml file
     # locals - hash of local variables
     def initialize(file, locals={})
       root = Dockit::Env.new.root
-      Dotenv.load(*ENVFILES.collect { |f| File.join(root, '.env') })
+      Dotenv.load(File.join(root, ENVFILE))
       locals['root'] ||= root
 
       begin

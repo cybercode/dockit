@@ -11,18 +11,18 @@ require 'dockit/version'
 module Dockit
   class Log
     def debug(msg)
-      STDERR.puts "DEBUG: " + msg.join(' ')
+      $stderr.puts "DEBUG: " + msg.join(' ')
     end
   end
 
   class Env
     BASENAME = 'Dockit'.freeze
-
     attr_reader :services
     attr_reader :modules
     attr_reader :depth
 
     def initialize(depth: 2, debug: false)
+      @root = nil
       @modules  = find_subcommands(depth)
       @services = find_services(depth)
 
@@ -34,7 +34,7 @@ module Dockit
       @root = dir = Dir.pwd
       begin
         dir = File.dirname(dir)
-        return @root = dir if File.exists?(File.join(dir, "#{BASENAME}.rb"))
+        return @root = dir if File.exist?(File.join(dir, "#{BASENAME}.rb"))
       end while dir != '/'
 
       @root
@@ -50,10 +50,10 @@ module Dockit
 
     private
     def find_relative(depth, ext)
-      memo = {}
+      result = {}
       (0..depth).each do |i|
         pat = File.join(root, ['*'] * i, "#{BASENAME}.#{ext}")
-        Pathname.glob(pat).inject(memo) do |memo, path|
+        Pathname.glob(pat).inject(result) do |memo, path|
           name       = path.dirname.relative_path_from(Pathname.new(root)).to_s
           name       = path.dirname.basename.to_s if name == '.'
           memo[name] = path.to_s
@@ -61,11 +61,11 @@ module Dockit
           memo
         end
       end
-      memo
+      result
     end
 
     def fix_root_module(modules)
-      if File.exists?(File.join(root, 'Dockit.rb'))
+      if File.exist?(File.join(root, 'Dockit.rb'))
         modules['all'] = modules.delete(File.basename(root))
       end
       modules

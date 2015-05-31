@@ -20,7 +20,7 @@ module Dockit
       def find(name: nil, id: nil)
         unless name || id
           STDERR.puts "Must specify name or id"
-          exit -1
+          exit 1
         end
         list().find do |container|
           name && container.info['Names'].include?(name) ||

@@ -56,7 +56,7 @@ module Dockit
     def pull(registry, tag=nil, force=false)
       unless repo = config.get(:build, 't')
         STDERR.puts "No such locally built image"
-        exit -1
+        exit 1
       end
 
       name = "#{registry}/#{repo}"
