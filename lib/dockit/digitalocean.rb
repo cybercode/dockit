@@ -50,6 +50,10 @@ class DO < Thor
     say "Processing images for #{args}"
     args.each do |k|
       s = service(k)
+      unless s.image
+        say ". No image for #{k}!", :red
+        next
+      end
       name    = s.config.get(:build, :t)
       id      = s.image.id
       msg     =  "#{k}: #{id[0..11]}(#{name})"

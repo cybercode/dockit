@@ -7,7 +7,7 @@
 [docker-api] libraries.
 
 ## Installation
-``` sh
+```sh
 $ gem install dockit
 ```
 
@@ -93,6 +93,7 @@ end
 Would run the `build` method from the file `app/Dockit.rb` and the create an image using the options from `db/Dockit.yaml`.
 
 ## The Github boilerplate
+
 ### Development
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
 
