@@ -55,6 +55,12 @@ class Default < Thor
     end
   end
 
+  desc "version", "Print version"
+  def version
+    say "Dockit version #{Dockit::VERSION}"
+  end
+  map %w[--version -V] => :version
+
   desc "list", "List available services"
   def list
     _list :modules

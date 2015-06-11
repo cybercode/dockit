@@ -1,11 +1,11 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'dockit/version'
+require 'version'
 
 Gem::Specification.new do |s|
   s.name          = "dockit"
-  s.version       = Dockit::VERSION
+  s.version       = Version.current
   s.authors       = ["Rick Frankel"]
   s.email         = ["dockitk@rickster.com"]
 
@@ -26,6 +26,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency "pry"       , "~> 0.10"
 
   s.add_dependency "thor", ">= 0.19"
-  s.add_dependency "dotenv", ">= 2.0"
+  s.add_dependency "dotenv", "~> 2.0"
   s.add_dependency "docker-api", "~> 1.21"
+  s.add_dependency "version", "~> 1.0.0"
 end
