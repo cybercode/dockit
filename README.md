@@ -1,17 +1,20 @@
 [docker-api]: https://github.com/swipely/docker-api
 
 # Dockit
+
 `Dockit` is an alternative composer for docker projects. It's (IMHO) advantaoge is that it is scriptable, and rather than a single yaml configuration file, each service has it's own configuration file (`Dockit.yaml`), as well as an optional `Dockit.rb` which can provide scriptable configuration (as `Thor` subcommands) for any phase of the build and deploy process.
 
 `Dockit` is built on the [Thor](https://github.com/erikhuda/thor) cli and the
 [docker-api] libraries.
 
 ## Installation
+
 ```sh
 $ gem install dockit
 ```
 
 ## Usage
+
 1. Create a top level deployment directory
 2. Create a sub-directory for each service
 3. Create a `Dockit.yaml` for each service (and optionally a `Docit.rb`.)
@@ -92,14 +95,24 @@ end
 
 Would run the `build` method from the file `app/Dockit.rb` and the create an image using the options from `db/Dockit.yaml`.
 
+## Running as a docker image
+
+If you don't want to install ruby, etc. the source code of this app has a `Dockerfile`, and you can create a docker image with `docker build -t dockit .` in the source directory. The `Dockerfile` has `dockit` as the entrypoint, so you can pass dockit arguments on the command-line. e.g.:
+
+```sh
+docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/app dockit help
+```
+
 ## The Github boilerplate
 
 ### Development
+
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release` to create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ### Contributing
+
 1. Fork it ( https://github.com/cybercode/dockit/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am [comment]`)
