@@ -26,6 +26,7 @@ end
 
 class Default < Thor
   DOCKIT_FILE = './Dockit.yaml'.freeze
+  @@root_echoed = false
 
   class_option :host, type: :string, desc: 'override DOCKER_HOST env variable',
                default: ENV['DOCKER_HOST'], aliases: ['H']
@@ -35,10 +36,14 @@ class Default < Thor
   class_option :locals, type: :hash, aliases: ['l'],
                banner: "key:value [key:value ...]",
                desc: "variables to pass to yaml file."
+
   def initialize(*args)
     super
     ENV['DOCKER_HOST'] = options.host
-    puts "Project root: #{dockit.root}"
+    unless @@root_echoed
+      puts "Project root: #{dockit.root}"
+      @@root_echoed=true
+    end
   end
 
   no_commands do
