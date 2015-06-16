@@ -63,7 +63,7 @@ module Dockit
     end
 
     def find_subcommands(depth)
-      fix_root_module(find_relative(depth, 'rb'))
+      find_relative(depth, 'rb')
     end
 
     def find_relative(depth, ext)
@@ -72,20 +72,13 @@ module Dockit
         pat = File.join(root, ['*'] * i, "#{BASENAME}.#{ext}")
         Pathname.glob(pat).inject(result) do |memo, path|
           name       = path.dirname.relative_path_from(Pathname.new(root)).to_s
-          name       = path.dirname.basename.to_s if name == '.'
+          name       = 'all' if name == '.'
           memo[name] = path.to_s
 
           memo
         end
       end
       result
-    end
-
-    def fix_root_module(modules)
-      if File.exist?(File.join(root, 'Dockit.rb'))
-        modules['all'] = modules.delete(File.basename(root))
-      end
-      modules
     end
   end
 end
