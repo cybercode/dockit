@@ -18,7 +18,7 @@ class SubCommand < Thor
       cmd = "#{service}:#{cmd}"
 
       say "Invoking #{cmd}"
-      invoke cmd, options.merge(opts)
+      invoke cmd, [], options.merge(opts)
       instance_variable_get('@_invocations')[Default].slice!(-1)
     end
   end
@@ -89,15 +89,15 @@ class Default < Thor
   end
 
   desc 'sh [SERVICE]', 'run an interactive command'
-  option :cmd, desc: "run command instead of shell", default: 'bash -l',
+  option :cmd, type: :array, desc: "run command instead of shell", default: 'bash -l',
          aliases: ['c']
   def sh(service=nil)
     exec(service) do |s|
-      cmd = %w[bash -l]
+      cmd = options.cmd || %w[bash -l]
       s.start(
         transient: true,
         create: {
-          Cmd: options.cmd.split(' '),
+          Cmd: cmd,
           name: 'sh',
           Tty: true,
           AttachStdin: true,

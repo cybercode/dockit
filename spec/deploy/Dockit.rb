@@ -1,4 +1,4 @@
-def All < SubCommand
+class All < SubCommand
   desc 'build', 'build modules'
   def build
     invoke_service 'mod'
