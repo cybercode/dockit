@@ -26,16 +26,17 @@ module Dockit
       end
 
       opts['Image'] ||= image.id if image
+      opts['name']  ||= config.get(:build, :t)
+
       run = merge_config(:run, stringify(options[:run]))
-      opts['name'] ||= config.get(:build, :t)
 
       if options[:verbose]
-        puts "  %s (%s)" % [
-               opts['name'] || 'unnamed',
-               (opts['Cmd']||%w[default command]).join(' ')
-             ]
-        puts "  #{run}" if run
+        cmd = [(opts['Entrypoint']||[]), ((opts['Cmd'] || %w[default]))].flatten
+        puts " * %s (%s)" % [ opts['name'] || 'unnamed', cmd.join(' ') ]
+
+        puts " * #{run}" if run.length > 0
       end
+
       Dockit::Container.new(opts).start(
         run, verbose: options[:verbose], transient: options[:transient])
     end

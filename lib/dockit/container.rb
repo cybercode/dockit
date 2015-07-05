@@ -31,7 +31,7 @@ module Dockit
     end
 
     def initialize(options)
-      @tty = options[:Tty]
+      @tty = options['Tty']
       @container = Docker::Container.create(options)
     end
 
@@ -40,6 +40,7 @@ module Dockit
       if transient
         if @tty
           trap("INT") {}
+          STDIN.raw!
         end
         container.attach(tty: @tty, stdin: @tty ? STDIN : nil) do |*args|
           if @tty then
@@ -48,6 +49,7 @@ module Dockit
             msg(*args)
           end
         end
+        STDIN.cooked!
         destroy
       end
     end

@@ -1,3 +1,4 @@
+require 'io/console'
 require 'thor'
 require 'dockit'
 
@@ -80,29 +81,33 @@ class Default < Thor
   end
 
   # "run" is a reserved word in thor...
-  desc 'start [SERVICE]', 'run a service'
+  desc 'start [SERVICE] [CMD]', 'run a service, optionally override "Cmd"'
   option :transient, type: :boolean, desc: 'remove container after run'
-  def start(service=nil)
+  def start(service=nil, *cmd)
+    opts = cmd.length > 0 ? options.merge(create: {Cmd: cmd}) : options
     exec(service) do |s|
-      s.start(options)
+      s.start(opts)
     end
   end
 
-  desc 'sh [SERVICE]', 'run an interactive command'
-  option :cmd, type: :array, desc: "run command instead of shell", default: 'bash -l',
-         aliases: ['c']
-  def sh(service=nil)
+  desc 'sh [SERVICE] [CMD]', 'run an interactive command (default "bash -l")'
+  def sh(service=nil, *cmd)
     exec(service) do |s|
-      cmd = options.cmd || %w[bash -l]
+      cmd = %w[bash -l] if cmd.length < 1
+
+      # in case image has an entrypoint, use the cmd as the entrypoint
+      (entrypoint, *cmd) = cmd
       s.start(
         transient: true,
+        verbose: options.verbose,
         create: {
+          Entrypoint: [entrypoint],
           Cmd: cmd,
           name: 'sh',
           Tty: true,
           AttachStdin: true,
-          # AttachStdout: true,
-          # AttachStderr: true,
+          AttachStdout: true,
+          AttachStderr: true,
           OpenStdin: true,
           StdinOnce: true,
         })
