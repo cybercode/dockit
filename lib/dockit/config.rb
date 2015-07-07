@@ -9,10 +9,11 @@ require 'dotenv'
 module Dockit
   class Config
     ENVFILE='.env'
+    ##
     # Instantiate and parse the file.
     #
-    # file   - dockit yaml file
-    # locals - hash of local variables
+    # file [String] :: dockit yaml file
+    # locals [Hash] :: local variables to bind in the ERB context
     def initialize(file, locals={})
       root = Dockit::Env.new.root
       Dotenv.load(File.join(root, ENVFILE))
@@ -26,11 +27,14 @@ module Dockit
         error(e)
       end
     end
-    # Public: Return the configuration hash for a given phase
-    # The Dockit.yaml file should have top-level entries for (at least)
-    # `build` and `run`
-    #
-    # If a key is specified, return it's value from the hash
+
+    # The +Dockit.yaml+ file should have top-level entries for (at least)
+    # +build+ and/or +create+
+    # name :: Top-level key
+    # key :: key in +name+ hash
+    # ==== Returns
+    # - Hash for +name+ if +key+ is nil.
+    # - Value of +key+ in +name+ hash.
     def get(name, key=nil)
       phase = @config[name.to_s]
       return phase unless key && phase
@@ -40,10 +44,8 @@ module Dockit
 
     private
     # Generate bindings object for locals to pass to erb
-    #
-    # locals - hash converted to local variables
-    #
-    # Returns binding object
+    # locals :: hash converted to local variables
+    # Returns :: binding object
     def bindings(locals)
       b  = binding
       locals.each do |k,v|

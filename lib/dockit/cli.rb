@@ -22,6 +22,11 @@ class SubCommand < Thor
       invoke cmd, [], options.merge(opts)
       instance_variable_get('@_invocations')[Default].slice!(-1)
     end
+
+    # export git repository before running default command
+    def invoke_git(service, gem=false)
+      invoke_default service, cmd: 'git-build', opts: { gem: gem || options.gem }
+    end
   end
 end
 
@@ -71,13 +76,6 @@ class Default < Thor
   def list
     _list :modules
     _list :services
-  end
-
-  desc 'build [SERVICE]', "Build image from current directory or service name"
-  def build(service=nil)
-    exec(service) do |s|
-      s.build()
-    end
   end
 
   # "run" is a reserved word in thor...
@@ -130,7 +128,7 @@ class Default < Thor
   desc 'config [SERVICE]', 'show parsed Dockit.yaml config file'
   def config(service=nil)
     exec(service) do |s|
-     say s.config.instance_variable_get('@config').to_yaml
+      say s.config.instance_variable_get('@config').to_yaml
     end
   end
   desc 'push REGISTRY [SERVICE]', 'push image for SERVICE to REGSITRY'
@@ -151,7 +149,50 @@ class Default < Thor
     end
   end
 
+  desc 'build [SERVICE]', "Build image from current directory or service name"
+  def build(service=nil)
+    exec(service) do |s|
+      s.build()
+    end
+  end
+
+  desc 'git-build', 'build from git (gem) repository'
+  option :branch, desc: '<tree-ish> git reference', default: 'master'
+  option :gem, type: :boolean, desc: "update Gemfiles export"
+  def git_build(service=nil)
+    exec(service) do |s|
+      unless repos = s.config.get(:repos)
+        say "'repos' not defined in config file. Exiting",:red
+        exit 1
+      end
+
+      say "Exporting in #{Dir.pwd}", :green
+      say "<- #{repos} #{options.branch}", :green
+      if options.gem
+        # grab the Gemfiles separately for the bundler Dockerfile hack
+        say "-> Gemfiles", :green
+        export(repos, 'gemfile.tar.gz', 'Gemfile*')
+      end
+
+      say "-> repos.tar.gz", :green
+      export(repos, 'repos.tar.gz')
+
+      s.build
+    end
+  end
+
   private
+  GIT_CMD   = 'git archive -o %s --format tar.gz --remote %s %s %s'.freeze
+  def export(repos, archive, args='')
+    cmd = GIT_CMD % [archive, repos, options.branch, args]
+    say "#{cmd}\n", :blue if options.debug
+
+    unless system(cmd)
+      say "Export error", :red
+      exit 1
+    end
+  end
+
   def ask_force(type)
     force = options[:force]
     say "Removing #{force ? 'ALL' : ''} #{type}...", force ? :red : nil
