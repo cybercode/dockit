@@ -4,8 +4,7 @@
 
 `Dockit` is an alternative composer for docker projects. It's (IMHO) advantaoge is that it is scriptable, and rather than a single yaml configuration file, each service has it's own configuration file (`Dockit.yaml`), as well as an optional `Dockit.rb` which can provide scriptable configuration (as `Thor` subcommands) for any phase of the build and deploy process.
 
-`Dockit` is built on the [Thor](https://github.com/erikhuda/thor) cli and the
-[docker-api] libraries.
+`Dockit` is built on the [Thor](https://github.com/erikhuda/thor) cli and the [docker-api] libraries.
 
 ## Installation
 
@@ -102,7 +101,7 @@ If the `droplet_kit` gem is found at runtime, the `do` service be implemented. s
 
 ## Running as a docker image
 
-If you don't want to install ruby, etc. the source code of this app has a `Dockerfile`, and you can create a docker image with `docker build -t dockit .` in the source directory. The `Dockerfile` has `dockit` as the entrypoint, so you can pass dockit arguments on the command-line. e.g.:
+If you don't want to install ruby, etc., the docker image is also available rom docker hub as `cybercode/dockit`. You can create your own version of the docker image from the source code with `docker build -t dockit .` (or `rake docker`). The `Dockerfile` has `dockit` as the entrypoint, so you can pass dockit arguments on the command-line. e.g.:
 
 ```sh
 docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $PWD:/app dockit help
