@@ -40,8 +40,16 @@ class DO < Thor
   end
 
   desc 'destroy', 'destroy REMOTE droplet'
+  option :force, type: :boolean, desc: "don't prompt"
   def destroy
-    client.droplets.delete(id: find(options.remote).id)
+    force = options[:force]
+    say "Destroying droplet: #{options.remote}", force ? :red : nil
+    if force || yes?("Are you sure?", :red)
+      client.droplets.delete(id: find(options.remote).id)
+    else
+      say "#{options.remote} not destroyed", :red
+    end
+
   end
 
   desc 'push [SERVICES]', 'push service(s) to digitalocean (default all)'
