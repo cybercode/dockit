@@ -4,15 +4,17 @@ require 'droplet_kit'
 
 class DO < Thor
   USERNAME = 'root'.freeze
+  REMOTE_CMDS = %w[start push].freeze
 
-  # invoking as `dockit do` or `dockti do list` doesn't require remote
-  # to be specified
-  def self.remote_required?
-    ARGV[-1] != 'list' && ARGV.size > 1
+  def self.remote_required?(extra_cmds=[])
+    ARGV[0] == 'do' && (
+      REMOTE_CMDS.include?(ARGV[1]) || extra_cmds.include?(ARGV[1]))
   end
 
   class_option :remote, type: :string, desc: 'remote host', required: remote_required?
   class_option :user  , type: :string, desc: 'remote user', default: USERNAME
+  class_option :token , type: :string, desc: 'token file basename', default: 'token',
+               aliases: ['t']
 
   desc 'create', 'create droplet REMOTE'
   def create
@@ -100,7 +102,7 @@ class DO < Thor
 
   def client
     @client ||= DropletKit::Client.new(
-      access_token: File.read(File.join(Dir.home, %w[.digitalocean token])))
+      access_token: File.read(File.join(Dir.home, '.digitalocean', options.token)))
   end
 
   def find(hostname)
