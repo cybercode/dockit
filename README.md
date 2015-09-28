@@ -2,7 +2,7 @@
 
 # Dockit
 
-`Dockit` is an alternative composer for docker projects. It's (IMHO) advantage is that it is scriptable, and rather than a single yaml configuration file, each service has it's own configuration file (`Dockit.yaml`), as well as an optional `Dockit.rb` which can provide scriptable configuration (as `Thor` subcommands) for any phase of the build and deploy process.
+`Dockit` is an alternative composer for docker projects. Its (IMHO) advantage is that it is scriptable, and rather than a single yaml configuration file, each service has it's own configuration file (`Dockit.yaml`), as well as an optional `Dockit.rb` which can provide scriptable configuration (as `Thor` subcommands) for any phase of the build and deploy process.
 
 `Dockit` is built on the [Thor](https://github.com/erikhuda/thor) cli and the [docker-api] libraries.
 
