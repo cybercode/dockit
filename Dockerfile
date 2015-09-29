@@ -1,17 +1,17 @@
-FROM tatsushid/tinycore-ruby:2.2
-ENV DOCKER_VERSION=1.8.1
-USER tc
-RUN tce-load -wic git
+FROM cybercode/alpine-ruby:2.2
+ENV DOCKER_VERSION=1.8.2 BIN=/usr/local/bin/docker
 
-USER root
-
-RUN wget -O /usr/local/bin/docker \
-    https://get.docker.io/builds/Linux/x86_64/docker-$DOCKER_VERSION \
-    && chmod +x /usr/local/bin/docker
+RUN apk add -u curl ruby-json && curl -sSL -o $BIN \
+    https://get.docker.com/builds/Linux/x86_64/docker-$DOCKER_VERSION \
+    && chmod +x $BIN && apk del curl
 
 WORKDIR /app
 COPY . .
+RUN apk --update add --virtual build_deps \
+    build-base ruby-dev libc-dev linux-headers git \
+    && gem build dockit.gemspec \
+    && gem install --no-rdoc --no-ri dockit*.gem \
+    && apk del build_deps && rm -rf /app
 
-RUN gem build dockit.gemspec && gem install dockit*.gem && rm -rf *
-
+WORKDIR /
 ENTRYPOINT ["dockit"]
