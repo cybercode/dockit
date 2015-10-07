@@ -28,7 +28,7 @@ class DO < Thor
     d = client.droplets.create(DropletKit::Droplet.new(
                             name: options.remote,
                             region: options.region,
-                            size: options.size,
+                            size: options[:size],
                             image: 'docker',
                             ssh_keys: client.ssh_keys.all.collect(&:id)))
     say  [d.id, d.status, d.name].join(' ')
