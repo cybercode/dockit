@@ -4,7 +4,7 @@ require 'droplet_kit'
 
 class DO < Thor
   USERNAME = 'root'.freeze
-  REMOTE_CMDS = %w[start push].freeze
+  REMOTE_CMDS = %w[start push create].freeze
 
   def self.remote_required?(extra_cmds=[])
     ARGV[0] == 'do' && (
@@ -17,6 +17,8 @@ class DO < Thor
                aliases: ['t']
 
   desc 'create', 'create droplet REMOTE'
+  option :size,   type: :string, desc: 'size for droplet',   default: '512mb'
+  option :region, type: :string, desc: 'region for droplet', default: 'nyc3'
   def create
     if find(options.remote)
       say  "Droplet #{options.remote} exists. Please destroy it first.", :red
@@ -25,8 +27,8 @@ class DO < Thor
     say "creating droplet: #{options.remote}"
     d = client.droplets.create(DropletKit::Droplet.new(
                             name: options.remote,
-                            region: 'nyc3',
-                            size: '512mb',
+                            region: options.region,
+                            size: options.size,
                             image: 'docker',
                             ssh_keys: client.ssh_keys.all.collect(&:id)))
     say  [d.id, d.status, d.name].join(' ')
