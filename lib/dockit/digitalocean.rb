@@ -11,10 +11,13 @@ class DO < Thor
       REMOTE_CMDS.include?(ARGV[1]) || extra_cmds.include?(ARGV[1]))
   end
 
-  class_option :remote, type: :string, desc: 'remote host', required: remote_required?
-  class_option :user  , type: :string, desc: 'remote user', default: USERNAME
-  class_option :token , type: :string, desc: 'token file basename', default: 'token',
-               aliases: ['t']
+  class_option :remote, type: :string, desc: 'remote droplet address',
+               required: remote_required?, aliases: ['r']
+  class_option :user  , type: :string, desc: 'remote user',
+               default: USERNAME, aliases: ['u']
+  class_option :token , type: :string,
+               desc: 'token filename relative to "~/.digitalocean"',
+               default: 'token'
 
   desc 'create', 'create droplet REMOTE'
   option :size,   type: :string, desc: 'size for droplet',   default: '512mb'
@@ -53,10 +56,12 @@ class DO < Thor
     else
       say "#{options.remote} not destroyed", :red
     end
-
   end
 
   desc 'push [SERVICES]', 'push service(s) to digitalocean (default all)'
+  option :backup, type: :boolean, desc: "Backup (tag) current version before push",
+         aliases: ['b']
+  option :tag, type: :string, desc: "tag name for backup", default: 'last'
   def push(*args)
     args = dockit.services.keys if args.empty?
     say "Processing images for #{args}"
@@ -73,6 +78,11 @@ class DO < Thor
              "docker images --no-trunc | grep #{id} > /dev/null")
         say ". Exists #{msg}"
       else
+        if options.backup
+          tag = "#{k}:#{options.tag}"
+          say "Tagging #{name} as #{tag}"
+          ssh(options.remote, options.user, "docker tag #{name} #{tag}")
+        end
         say ". Pushing #{msg}"
         ssh(options.remote, options.user, 'docker load', "docker save #{name}")
       end

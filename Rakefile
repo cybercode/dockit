@@ -22,6 +22,7 @@ end
 desc "Generate Documentation"
 task doc: :rdoc
 
+desc "Build docker image"
 task :docker do
   system 'docker build -t dockit .'
 end
