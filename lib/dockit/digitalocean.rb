@@ -94,7 +94,7 @@ class DO < Thor
          desc: 'extra environment variables not defined in Dockit.yaml'
   def start(name)
     s     = service(name)
-    name  = s.config.get(:create, :name) || s.config.get(:build, :t)
+    name  = s.name
     links = config(s, :run,    :Links, 'l')
     binds = config(s, :run,    :Binds, 'v')
 

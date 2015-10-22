@@ -1,2 +1,4 @@
 build:
-  t: dockit-test
+  t: svc-test
+create:
+  name: a-test

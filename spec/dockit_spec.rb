@@ -1,4 +1,5 @@
 require 'spec_helper'
+
 shared_examples 'a dockit config' do |meth, keys, dirs, ext|
   def dockit_files(names, ext)
     pwd = File.dirname(__FILE__)
@@ -76,5 +77,28 @@ describe Dockit::Env do
   describe '#services' do
     svcs = %w[mod svc]
     it_should_behave_like 'a dockit config', 'services', svcs, svcs, 'yaml'
+  end
+end
+
+describe Dockit::Service do
+  before do
+    @env = Dockit::Env.new
+  end
+
+  subject do
+    Dockit::Service.new(@env.services['mod'])
+  end
+
+  it 'should be created' do
+    expect(subject).to be_a Dockit::Service
+  end
+
+  it "should get it's name from the build tag" do
+    expect(subject.config.get(:build, :t)).to eq('mod:tagged')
+    expect(subject.name).to eq('mod')
+  end
+
+  it "should get it's name from the create name" do
+    expect(Dockit::Service.new(@env.services['svc']).name).to eq('a-test')
   end
 end

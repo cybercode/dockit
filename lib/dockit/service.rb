@@ -77,6 +77,10 @@ module Dockit
       image.id
     end
 
+    def name
+      n = config.get(:create, :name) || config.get(:build, :t).split(':')[0]
+    end
+
     private
     def merge_config(key, opts)
       (config.get(key) || {}).merge(opts||{})

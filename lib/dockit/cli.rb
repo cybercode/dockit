@@ -91,17 +91,19 @@ class Default < Thor
   desc 'sh [SERVICE] [CMD]', 'run an interactive command (default "bash -l")'
   def sh(service=nil, *cmd)
     exec(service) do |s|
-      cmd = %w[bash -l] if cmd.length < 1
+      cmd  = %w[bash -l] if cmd.length < 1
+      name = "sh-#{s.name}"
 
       # in case image has an entrypoint, use the cmd as the entrypoint
       (entrypoint, *cmd) = cmd
+      say "Starting #{name} with #{entrypoint} #{cmd}", :green
       s.start(
         transient: true,
         verbose: options.verbose,
         create: {
           Entrypoint: [entrypoint],
           Cmd: cmd,
-          name: 'sh',
+          name: "sh-#{name}",
           Tty: true,
           AttachStdin: true,
           AttachStdout: true,

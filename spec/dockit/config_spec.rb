@@ -42,7 +42,9 @@ describe Dockit::Config do
   context 'file with locals' do
     let(:path) {file('locals') }
     it 'should exit with a message if a local is missing' do
-      expect { Dockit::Config.new(path) }.to raise_error(SystemExit, /forget/)
+      expect {
+        expect { Dockit::Config.new(path) }.to raise_error(SystemExit, /forget/)
+      }.to output(/^Undefined local/).to_stderr
     end
 
     it 'should expand the locals' do
