@@ -83,6 +83,7 @@ class Default < Thor
   option :transient, type: :boolean, desc: 'remove container after run'
   def start(service=nil, *cmd)
     opts = cmd.length > 0 ? options.merge(create: {Cmd: cmd}) : options
+    opts[:create][:tty] = options[:transient]
     exec(service) do |s|
       s.start(opts)
     end
