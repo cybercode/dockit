@@ -8,6 +8,7 @@ module Dockit
       end
 
       def clean(force: false)
+        puts "Containers..."
         list(
           all: force,
           filters: force ? nil : {status: [:exited]}

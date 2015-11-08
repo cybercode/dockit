@@ -116,15 +116,19 @@ class Default < Thor
   end
 
   desc "cleanup", "Remove unused containers and images"
-  option :images     , type: :boolean, default: true, desc: "remove danging images"
-  option :containers , type: :boolean, default: true, desc: "remove exited containers"
-  option :force, type: :boolean, default: false, desc: "stop and remove all"
+  option :images    , type: :boolean, default: true , desc: "remove danging images"
+  option :containers, type: :boolean, default: true , desc: "remove exited containers"
+  option :volumes   , type: :boolean, default: true , desc: 'remove dangling volumes'
+  option :force     , type: :boolean, default: false, desc: "stop and remove all"
   def cleanup
-    if options[:containers]
-      Dockit::Container.clean(force: options[:force]) if ask_force('containers')
-    end
-    if options[:images]
-      Dockit::Image.clean(force: options[:force]) if ask_force('images')
+    force = options[:force]
+    Dockit::Container.clean(force: force) if options[:containers]
+    Dockit::Image.clean(force: force)     if options[:images]
+
+    if options[:volumes] && Docker.version['ApiVersion'].to_f >= 1.21
+      Dockit::Volume.clean
+    else
+      say "Volumes not supported on API versions < 1.21", :red
     end
   end
 
@@ -194,14 +198,6 @@ class Default < Thor
       say "Export error", :red
       exit 1
     end
-  end
-
-  def ask_force(type)
-    force = options[:force]
-    say "Removing #{force ? 'ALL' : ''} #{type}...", force ? :red : nil
-
-    return true ### DISABLED# unless force
-    yes? '... Are you sure?'
   end
 
   def dockit

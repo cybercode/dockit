@@ -7,6 +7,7 @@ require 'dockit/config'
 require 'dockit/service'
 require 'dockit/image'
 require 'dockit/container'
+require 'dockit/volume'
 
 module Dockit
   is_versioned

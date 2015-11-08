@@ -34,6 +34,7 @@ module Dockit
       end
 
       def clean(force: false)
+        puts "Images..."
         list(
           all: force,
           filters: force ? nil : {dangling: ['true']}
