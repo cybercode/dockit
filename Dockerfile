@@ -1,4 +1,4 @@
-FROM cybercode/alpine-ruby
+FROM cybercode/alpine-ruby:2.2
 ENV DOCKER_VERSION=1.9.1 BIN=/usr/local/bin/docker
 
 RUN apk --update add curl ruby-json && curl -sSL -o $BIN \
