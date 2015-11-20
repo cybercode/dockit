@@ -7,3 +7,7 @@
 /pkg/
 /spec/reports/
 /tmp/
+/.rbenv-gemsets
+/.rspec
+/.travis.yml
+/*.gem

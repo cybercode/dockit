@@ -68,22 +68,26 @@ class DO < Thor
     args.each do |k|
       s = service(k)
       unless s.image
-        say ". No image for #{k}!", :red
+        say ". #{k}: No image!", :red
         next
       end
       name    = s.config.get(:build, :t)
+      unless name.present?
+        say ". #{k}: not a local build", :red
+        next
+      end
       id      = s.image.id
-      msg     =  "#{k}: #{id[0..11]}(#{name})"
+      msg     =  "#{k}(#{id[0..11]}[#{name}]):"
       if ssh(options.remote, options.user,
              "docker images --no-trunc | grep #{id} > /dev/null")
-        say ". Exists #{msg}"
+        say ". #{msg} exists"
       else
         if options.backup
           tag = "#{k}:#{options.tag}"
-          say "Tagging #{name} as #{tag}"
+          say "#{msg} tagging as #{tag}"
           ssh(options.remote, options.user, "docker tag #{name} #{tag}")
         end
-        say ". Pushing #{msg}"
+        say "#{msg} pushing"
         ssh(options.remote, options.user, 'docker load', "docker save #{name}")
       end
     end
