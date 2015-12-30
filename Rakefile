@@ -24,5 +24,5 @@ task doc: :rdoc
 
 desc "Build docker image"
 task :docker do
-  system 'docker build -t dockit .'
+  system 'docker build -t cybercode/dockit .'
 end

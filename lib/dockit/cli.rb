@@ -172,17 +172,22 @@ class Default < Thor
         say "'repos' not defined in config file. Exiting",:red
         exit 1
       end
-
+      path    = s.config.get(:repos_path)
+      treeish = unless path.nil? || path.empty?
+                  "#{options.branch}:#{path}"
+                else
+                  options.branch
+                end
       say "Exporting in #{Dir.pwd}", :green
-      say "<- #{repos} #{options.branch}", :green
+      say "<- #{repos} #{treeish}", :green
       if options.gem
         # grab the Gemfiles separately for the bundler Dockerfile hack
         say "-> Gemfiles", :green
-        export(repos, 'gemfile.tar.gz', 'Gemfile*')
+        export(repos, treeish, 'gemfile.tar.gz', 'Gemfile*')
       end
 
       say "-> repos.tar.gz", :green
-      export(repos, 'repos.tar.gz')
+      export(repos, treeish, 'repos.tar.gz')
 
       s.build
     end
@@ -190,8 +195,8 @@ class Default < Thor
 
   private
   GIT_CMD   = 'git archive -o %s --format tar.gz --remote %s %s %s'.freeze
-  def export(repos, archive, args='')
-    cmd = GIT_CMD % [archive, repos, options.branch, args]
+  def export(repos, branch, archive, args='')
+    cmd = GIT_CMD % [archive, repos, branch, args]
     say "#{cmd}\n", :blue if options.debug
 
     unless system(cmd)
