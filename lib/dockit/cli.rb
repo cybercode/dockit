@@ -42,10 +42,15 @@ class Default < Thor
   class_option :locals, type: :hash, aliases: ['l'],
                banner: "key:value [key:value ...]",
                desc: "variables to pass to yaml file."
+  class_option :timeout, type: :numeric, desc: 'Timeout for excon', default: 60
 
   def initialize(*args)
     super
     ENV['DOCKER_HOST'] = options.host
+
+    # passed to Excon, default is 60sec,
+    Docker.options[:read_timeout] = options.timeout
+
     unless @@root_echoed
       puts "Project root: #{dockit.root}"
       @@root_echoed=true
