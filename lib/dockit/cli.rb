@@ -125,10 +125,16 @@ class Default < Thor
   option :containers, type: :boolean, default: true , desc: "remove exited containers"
   option :volumes   , type: :boolean, default: true , desc: 'remove dangling volumes'
   option :force     , type: :boolean, default: false, desc: "stop and remove all"
+  option 'except-containers', type: :array, desc: "container names to leave if :force", aliases: %[C]
+  option 'except-images', type: :array, desc: "image tags (name:version) to leave if :force", aliases: %[I]
+
   def cleanup
     force = options[:force]
-    Dockit::Container.clean(force: force) if options[:containers]
-    Dockit::Image.clean(force: force)     if options[:images]
+    Dockit::Container.clean(
+      force: force, except: options['except-containers']) if options[:containers]
+
+    Dockit::Image.clean(
+      force: force, except: options['except-images']) if options[:images]
 
     if options[:volumes] && Docker.version['ApiVersion'].to_f >= 1.21
       Dockit::Volume.clean

@@ -33,13 +33,20 @@ module Dockit
         Docker::Image.get(name)
       end
 
-      def clean(force: false)
+      def clean(force: false, except: [])
+        except ||= []
         puts "Images..."
         list(
           all: force,
           filters: force ? nil : {dangling: ['true']}
         ).each do |image|
+          names = image.info["RepoTags"]
           puts "  #{image.id}"
+          if (names & except).count > 0
+            puts "  ... skipping #{names}"
+            next
+          end
+
           image.remove(force: true)
         end
       end

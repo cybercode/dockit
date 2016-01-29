@@ -7,13 +7,20 @@ module Dockit
         Docker::Container.all(all: all, filters: JSON.dump(filters))
       end
 
-      def clean(force: false)
+      def clean(force: false, except: [])
         puts "Containers..."
+        except = (except||[]).map { |e| "/#{e}"}
+
         list(
           all: force,
           filters: force ? nil : {status: [:exited]}
         ).each do |container|
+          names = container.info['Names']
           puts "  #{container.id}"
+          if (names & except).count > 0
+            puts "  ... skipping #{names}"
+            next
+          end
           container.delete(force: true, v: force)
         end
       end
