@@ -52,7 +52,7 @@ class Default < Thor
     Docker.options[:read_timeout] = options.timeout
 
     unless @@root_echoed
-      puts "Project root: #{dockit.root}"
+      say "Project root: #{dockit.root}", :red
       @@root_echoed=true
     end
   end
@@ -177,10 +177,30 @@ class Default < Thor
   desc 'git-build', 'build from git (gem) repository'
   option :branch, desc: '<tree-ish> git reference', default: 'master'
   option :gem, type: :boolean, desc: "update Gemfiles export"
+  option :package, type: :boolean, desc: "update package config export"
+  long_desc <<-LONGDESC
+     Dockit.yaml keys used:
+     \x5 repos_path: optional treeish path
+     \x5 repos: repository location
+     \x5 package: optional (default 'Gemfile*')
+
+    `dockit git-build` will export {branch}:repos_path from the
+     repository location specified in the :repos key to 'repos.tar.gz'
+
+     The '--package' option will export the files in the :package key (or
+     Gemfile*) in Dockit.yaml separately to 'package.tar.gz'. This is docker
+     best practice for building rails apps.
+
+     *Note* The default (Gemfile*) will be removed in version 2.0.
+
+     The deprecated '--gem' option is will export the packages to
+     'gemfile.tar.gz'.
+  LONGDESC
+
   def git_build(service=nil)
     exec(service) do |s|
       unless repos = s.config.get(:repos)
-        say "'repos' not defined in config file. Exiting",:red
+        say "'repos' not defined in config file. Exiting", :red
         exit 1
       end
       path    = s.config.get(:repos_path)
@@ -191,10 +211,12 @@ class Default < Thor
                 end
       say "Exporting in #{Dir.pwd}", :green
       say "<- #{repos} #{treeish}", :green
-      if options.gem
-        # grab the Gemfiles separately for the bundler Dockerfile hack
-        say "-> Gemfiles", :green
-        export(repos, treeish, 'gemfile.tar.gz', 'Gemfile*')
+
+      if options.gem || options.package
+        packages = s.config.get(:package) || 'Gemfile*'
+        archive  = options.gem ? 'gemfile.tar.gz' : 'package.tar.gz'
+        say "-> #{archive}", :green
+        export(repos, treeish, archive, packages)
       end
 
       say "-> repos.tar.gz", :green
