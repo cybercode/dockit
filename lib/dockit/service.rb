@@ -61,14 +61,10 @@ module Dockit
       end
 
       name = "#{registry}/#{repo}"
-      image = Docker::Image.create(
-        fromImage: name) do |chunk|
-        chunk = JSON.parse(chunk)
-        progress = chunk['progress']
-        id = progress ? '' : chunk['id']
-        print chunk['stream'] ? chunk['stream'] :
-                [chunk['status'], id, progress, progress ? "\r" : "\n"].join(' ')
+      image = Docker::Image.create(fromImage: name) do |chunk|
+        Dockit::Log::print_chunk(chunk)
       end
+
       puts "Tagging #{name} as #{repo}:#{tag||'latest'}"
       image.tag(repo: repo, tag: tag, force: force)
     end

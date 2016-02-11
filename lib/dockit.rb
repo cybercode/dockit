@@ -16,6 +16,26 @@ module Dockit
     def debug(msg)
       $stderr.puts "DEBUG: " + msg.join(' ')
     end
+
+    def self.print_chunk(chunk)
+      begin
+        chunk = JSON.parse(chunk)
+      rescue Docker::Error::UnexpectedResponseError => e
+        $stderr.puts "Response parse error:", e.message, chunk
+      end
+
+      progress = chunk['progress']
+      id = progress ? '' : chunk['id']
+      $stdout.puts(
+        if chunk['errorDetail']
+          'ERROR: ' +  chunk['errorDetail']['message']
+        elsif chunk['stream']
+          chunk['stream']
+        else
+          [chunk['status'], id, progress, progress ? "\r" : "\n"].join(' ')
+        end
+      )
+    end
   end
 
   # This class encapsulates the environment used in the Dockit cli.

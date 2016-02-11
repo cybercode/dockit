@@ -42,7 +42,7 @@ class Default < Thor
   class_option :locals, type: :hash, aliases: ['l'],
                banner: "key:value [key:value ...]",
                desc: "variables to pass to yaml file."
-  class_option :timeout, type: :numeric, desc: 'Timeout for excon', default: 60
+  class_option :timeout, type: :numeric, desc: 'Timeout for excon', default: 180
 
   def initialize(*args)
     super

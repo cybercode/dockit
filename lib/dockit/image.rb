@@ -14,16 +14,16 @@ module Dockit
         end
         repos = config['t']
         puts  "Building #{repos}"
-        image = Docker::Image.build_from_dir('.', config) do |chunk|
-          begin
-            chunk = JSON.parse(chunk)
-            progress = chunk['progress']
-            id = progress ? '' : chunk['id']
-            print chunk['stream'] ? chunk['stream'] :
-                    [chunk['status'], id, progress, progress ? "\r" : "\n"].join(' ')
-          rescue
-            puts chunk
+        begin
+          image = Docker::Image.build_from_dir('.', config) do |chunk|
+            Dockit::Log.print_chunk(chunk)
           end
+        rescue Docker::Error::TimeoutError => e
+          $stderr.puts '* Read timeout, try again with a larger "--timeout"'
+          exit 1
+        rescue Docker::Error::UnexpectedResponseError => e
+          $stderr.puts 'Build error, exiting.'
+          exit 1
         end
 
         image
