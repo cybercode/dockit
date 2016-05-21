@@ -16,28 +16,37 @@ module Dockit
     def debug(msg)
       $stderr.puts "DEBUG: " + msg.join(' ')
     end
-
-    def self.print_chunk(chunk)
-      begin
-        chunk = JSON.parse(chunk)
-      rescue Docker::Error::UnexpectedResponseError => e
-        $stderr.puts "Response parse error:", e.message, chunk
+    class << self
+      # new docker app (xhyve) returns multi-line (multiple JSON hash) chunks.
+      # So, split them up before trying to parse them.
+      def print_chunk(chunk)
+        chunk.each_line { |c| print_one_chunk(c) }
       end
 
-      progress = chunk['progress']
-      id = progress ? '' : chunk['id']
-      $stdout.puts(
-        if chunk['errorDetail']
-          'ERROR: ' +  chunk['errorDetail']['message']
-        elsif chunk['stream']
-          chunk['stream']
-        else
-          [chunk['status'], id, progress, progress ? "\r" : "\n"].join(' ')
+      private
+      def print_one_chunk(chunk)
+        begin
+          chunk = JSON.parse(chunk)
+        rescue Docker::Error::UnexpectedResponseError => e
+          $stderr.puts "Unexpected response:", e.message, chunk
+        rescue JSON::ParserError
+          $stderr.puts "Parse Error: #{chunk}"
         end
-      )
+
+        progress = chunk['progress']
+        id = progress ? '' : chunk['id']
+        $stdout.puts(
+          if chunk['errorDetail']
+            'ERROR: ' +  chunk['errorDetail']['message']
+          elsif chunk['stream']
+            chunk['stream']
+          else
+            [chunk['status'], id, progress, progress ? "\r" : "\n"].join(' ')
+          end
+        )
+      end
     end
   end
-
   # This class encapsulates the environment used in the Dockit cli.
   # The class has three main attributes:
   #
