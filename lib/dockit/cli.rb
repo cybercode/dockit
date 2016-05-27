@@ -1,6 +1,9 @@
+# coding: utf-8
 require 'io/console'
 require 'thor'
 require 'dockit'
+
+GIT_BRANCH=`git symbolic-ref --short HEAD 2>/dev/null`
 
 class SubCommand < Thor
   no_commands do
@@ -124,17 +127,21 @@ class Default < Thor
   option :images    , type: :boolean, default: true , desc: "remove danging images"
   option :containers, type: :boolean, default: true , desc: "remove exited containers"
   option :volumes   , type: :boolean, default: true , desc: 'remove dangling volumes'
-  option :force     , type: :boolean, default: false, desc: "stop and remove all"
-  option 'except-containers', type: :array, desc: "container names to leave if :force", aliases: %[C]
-  option 'except-images', type: :array, desc: "image tags (name:version) to leave if :force", aliases: %[I]
-
+  option 'force-containers', type: :boolean, default: false,
+         desc: 'stop and remove all containers', aliases: %[f]
+  option 'except-containers', type: :array,
+         desc: "container names to leave if 'force-containers' true", aliases: %[C]
+  option 'force-images', type: :boolean, default: false, desc: 'remove ALL volumes'
+  option 'except-images', type: :array,
+         desc: "image tags (name:version) to leave if 'force-images' true", aliases: %[I]
   def cleanup
-    force = options[:force]
     Dockit::Container.clean(
-      force: force, except: options['except-containers']) if options[:containers]
+      force: options['force-containers'], except: options['except-containers']
+    ) if options[:containers]
 
     Dockit::Image.clean(
-      force: force, except: options['except-images']) if options[:images]
+      force: options['force-images'], except: options['except-images']
+    ) if options[:images]
 
     if options[:volumes] && Docker.version['ApiVersion'].to_f >= 1.21
       Dockit::Volume.clean
@@ -149,6 +156,7 @@ class Default < Thor
       say s.config.instance_variable_get('@config').to_yaml
     end
   end
+
   desc 'push REGISTRY [SERVICE]', 'push image for SERVICE to REGSITRY'
   option :force, type: :boolean, desc: 'overwrite current lastest version'
   option :tag,  desc: 'repos tag (defaults to "latest")', aliases: ['t']
@@ -175,32 +183,29 @@ class Default < Thor
   end
 
   desc 'git-build', 'build from git (gem) repository'
-  option :branch, desc: '<tree-ish> git reference', default: 'master'
-  option :gem, type: :boolean, desc: "update Gemfiles export"
+  option :branch, desc: '<tree-ish> git reference', default: GIT_BRANCH
   option :package, type: :boolean, desc: "update package config export"
   long_desc <<-LONGDESC
      Dockit.yaml keys used:
      \x5 repos_path: optional treeish path
      \x5 repos: repository location
-     \x5 package: optional (default 'Gemfile*')
+     \x5 package: optional
 
     `dockit git-build` will export {branch}:repos_path from the
      repository location specified in the :repos key to 'repos.tar.gz'
 
-     The '--package' option will export the files in the :package key (or
-     Gemfile*) in Dockit.yaml separately to 'package.tar.gz'. This is docker
-     best practice for building rails apps.
+     The '--package' option will export the files in the :package key in
+     Dockit.yaml separately to 'package.tar.gz'. This is docker best practice
+     for building rails apps.
 
-     *Note* The default (Gemfile*) will be removed in version 2.0.
-
-     The deprecated '--gem' option is will export the packages to
-     'gemfile.tar.gz'.
+     *Breaking change (2.0)* ~branch~ now defaults to the *current* local
+      branch, not ~master~.
   LONGDESC
 
   def git_build(service=nil)
     exec(service) do |s|
       unless repos = s.config.get(:repos)
-        say "'repos' not defined in config file. Exiting", :red
+        say "'repos' not defined in config file. Exiting…", :red
         exit 1
       end
       path    = s.config.get(:repos_path)
@@ -212,8 +217,12 @@ class Default < Thor
       say "Exporting in #{Dir.pwd}", :green
       say "<- #{repos} #{treeish}", :green
 
-      if options.gem || options.package
-        packages = s.config.get(:package) || 'Gemfile*'
+      if options.package
+        unless packages = s.config.get(:package)
+          say "'packages' not defined in config file. Exiting…", :red
+          exit 1
+        end
+
         archive  = options.gem ? 'gemfile.tar.gz' : 'package.tar.gz'
         say "-> #{archive}", :green
         export(repos, treeish, archive, packages)
