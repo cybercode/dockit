@@ -3,7 +3,7 @@ require 'io/console'
 require 'thor'
 require 'dockit'
 
-GIT_BRANCH=`git symbolic-ref --short HEAD 2>/dev/null`
+GIT_BRANCH=`git symbolic-ref --short HEAD 2>/dev/null`.chomp
 
 class SubCommand < Thor
   no_commands do
