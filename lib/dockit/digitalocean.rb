@@ -64,6 +64,7 @@ class DO < Thor
   option :tag, type: :string, desc: "tag name for backup", default: 'last'
   def push(*args)
     args = dockit.services.keys if args.empty?
+    say "Pushing to #{options.remote} as #{options.user}", :green
     say "Processing images for #{args}"
     args.each do |k|
       s = service(k)
