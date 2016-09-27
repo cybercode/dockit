@@ -233,7 +233,7 @@ class Default < Thor
       say '-> repos.tar.gz', :green
       export(repos, treeish, 'repos.tar.gz')
 
-      say "Creating '.branch' tag file (#{options.branch})", :green
+      say "Creating '.branch' tag file (#{options.branch})", :blue
       File.write('.branch', "#{options.branch}\n")
 
       s.build
