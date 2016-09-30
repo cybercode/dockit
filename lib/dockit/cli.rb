@@ -225,9 +225,8 @@ class Default < Thor
           exit 1
         end
 
-        archive  = ''
         say '-> package.tar.gz', :green
-        export(repos, treeish, archive, 'package.tar.gz')
+        export(repos, treeish, 'package.tar.gz', packages)
       end
 
       say '-> repos.tar.gz', :green
