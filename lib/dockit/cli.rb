@@ -27,8 +27,8 @@ class SubCommand < Thor
     end
 
     # export git repository before running default command
-    def invoke_git(service, gem=false)
-      invoke_default service, cmd: 'git-build', opts: { gem: gem || options.gem }
+    def invoke_git(service)
+      invoke_default service, cmd: 'git-build'
     end
   end
 end
@@ -182,9 +182,11 @@ class Default < Thor
     end
   end
 
-  desc 'git-build', 'build from git (gem) repository'
+  desc 'git-build', 'build from git repository'
   option :branch, desc: '<tree-ish> git reference', default: GIT_BRANCH
-  option :package, type: :boolean, desc: "update package config export"
+  option :package, type: :boolean, desc: 'update package config export'
+  option :tag, type: :boolean,
+         desc: 'create local tag file ".branch" with branch name'
   long_desc <<-LONGDESC
      Dockit.yaml keys used:
      \x5 repos_path: optional treeish path
@@ -196,7 +198,7 @@ class Default < Thor
 
      The '--package' option will export the files in the :package key in
      Dockit.yaml separately to 'package.tar.gz'. This is docker best practice
-     for building rails apps.
+     for building rails apps, and works equally well for nodejs.
 
      *Breaking change (2.0)* ~branch~ now defaults to the *current* local
       branch, not ~master~.
@@ -223,13 +225,15 @@ class Default < Thor
           exit 1
         end
 
-        archive  = options.gem ? 'gemfile.tar.gz' : 'package.tar.gz'
-        say "-> #{archive}", :green
-        export(repos, treeish, archive, packages)
+        say '-> package.tar.gz', :green
+        export(repos, treeish, 'package.tar.gz', packages)
       end
 
-      say "-> repos.tar.gz", :green
+      say '-> repos.tar.gz', :green
       export(repos, treeish, 'repos.tar.gz')
+
+      say "Creating '.branch' tag file (#{options.branch})", :blue
+      File.write('.branch', "#{options.branch}\n")
 
       s.build
     end

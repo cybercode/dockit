@@ -79,7 +79,7 @@ The `dockit.rb` file can be used to add new subcommands to the cli on a project-
 
 - `invoke_default(service)` will run the same-named (or specified) dockit command on the specified service.
 - `invoke_service(service)` will run the same-named (or specifed) subcommand from the `Dockit.rb` for the specified service.
-- `invoke_git(service, gem=false)` will run the same-name (or specifed) subcommand from the `Dockit.rb` for the specified service after checking out the git repository for the service as a gzip archive to `repos.tar.tz`. By default it used the `master` branch. If `gem` is true, it will checkout the gemfiles as a separate archive (`gemfiles.tar.gz`). Note that the `repos` key must be set in the services yaml file.
+- `invoke_git(service)` will run the same-name (or specifed) subcommand from the `Dockit.rb` for the specified service after checking out the git repository for the service as a gzip archive to `repos.tar.tz`. By default it used the `master` branch. Note that the `repos` key must be set in the services yaml file.
 
 For example:
 
