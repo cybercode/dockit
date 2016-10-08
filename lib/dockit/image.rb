@@ -40,7 +40,7 @@ module Dockit
           all: force,
           filters: force ? nil : {dangling: ['true']}
         ).each do |image|
-          names = image.info["RepoTags"]
+          names = image.info["RepoTags"]||[]
           puts "  #{image.id}"
           if (names & except).count > 0
             puts "  ... skipping #{names}"
