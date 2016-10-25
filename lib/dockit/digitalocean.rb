@@ -13,9 +13,9 @@ class DO < Thor
 
   class_option :remote, type: :string, desc: 'remote droplet address',
                required: remote_required?, aliases: ['r']
-  class_option :user  , type: :string, desc: 'remote user',
+  class_option :user, type: :string, desc: 'remote user',
                default: USERNAME, aliases: ['u']
-  class_option :token , type: :string,
+  class_option :token, type: :string,
                desc: 'token filename relative to "~/.digitalocean"',
                default: 'token'
 

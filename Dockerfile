@@ -1,13 +1,10 @@
 FROM cybercode/alpine-ruby:2.3
-ENV DOCKER_VERSION=1.11.2 BIN=/usr/local/bin/docker
 
-RUN apk --update add curl ruby-json && curl -sSL -o $BIN \
-    https://get.docker.com/builds/Linux/x86_64/docker-$DOCKER_VERSION \
-    && chmod +x $BIN && apk del curl
+RUN apk --update add docker
 
 WORKDIR /app
 COPY . .
-RUN apk --update add --virtual build_deps \
+RUN apk add --virtual build_deps \
     build-base ruby-dev libc-dev linux-headers git \
     && gem build dockit.gemspec \
     && gem install --no-rdoc --no-ri dockit*.gem \
