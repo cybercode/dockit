@@ -30,6 +30,20 @@ class SubCommand < Thor
     def invoke_git(service)
       invoke_default service, cmd: 'git-build'
     end
+
+    def project_root
+      shell.base.project_root
+    end
+
+    def directory
+      @directory ||= shell.base.module_directory(self.class)
+    end
+
+    def in_directory
+      Dir.chdir(directory) do
+        yield
+      end
+    end
   end
 end
 
@@ -55,7 +69,7 @@ class Default < Thor
     Docker.options[:read_timeout] = options.timeout
 
     unless @@root_echoed
-      say "Project root: #{dockit.root}", :red
+      say "Project root: #{project_root}", :red
       @@root_echoed=true
     end
   end
@@ -63,6 +77,14 @@ class Default < Thor
   no_commands do
     def _list(what)
       puts what.to_s.capitalize, dockit.send(what).keys.collect {|s| "  #{s}"}
+    end
+
+    def module_directory(klass)
+      File.dirname(dockit.modules[klass.to_s.downcase])
+    end
+
+    def project_root
+      dockit.root
     end
   end
 
@@ -240,7 +262,7 @@ class Default < Thor
   end
 
   private
-  GIT_CMD   = 'git archive -o %s --format tar.gz --remote %s %s %s'.freeze
+  GIT_CMD = 'git archive -o %s --format tar.gz --remote %s %s %s'.freeze
   def export(repos, branch, archive, args='')
     cmd = GIT_CMD % [archive, repos, branch, args]
     say "#{cmd}\n", :blue if options.debug
