@@ -305,7 +305,8 @@ begin
   require 'dockit/digitalocean'
   Default.desc 'do', 'manage docker server'
   Default.subcommand 'do', DO
-rescue LoadError
+rescue LoadError => e
+  STDERR.puts "* No DigitalOcean support: #{e.message}"
 end
 
 # it would be nice to do this in the initialization method of the Default

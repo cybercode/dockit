@@ -1,6 +1,6 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-require 'simplecov'
 if ENV['COVERAGE']
+  require 'simplecov'
   puts 'Generating coverage report'
   SimpleCov.start
 end

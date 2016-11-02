@@ -14,6 +14,8 @@ module Dockit
         end
         repos = config['t']
         puts  "Building #{repos}"
+
+        convert_buildargs(config)
         begin
           image = Docker::Image.build_from_dir('.', config) do |chunk|
             Dockit::Log.print_chunk(chunk)
@@ -49,6 +51,13 @@ module Dockit
 
           image.remove(force: true)
         end
+      end
+
+      private
+      def convert_buildargs(config)
+        return unless args = config['buildargs']
+        return if args.is_a?(String)
+        config['buildargs'] = args.to_json
       end
     end
   end
