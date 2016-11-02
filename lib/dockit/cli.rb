@@ -112,8 +112,8 @@ class Default < Thor
   desc 'start [SERVICE] [CMD]', 'run a service, optionally override "Cmd"'
   option :transient, type: :boolean, desc: 'remove container after run'
   def start(service=nil, *cmd)
-    opts = options.merge(create: {tty: options[:transient]})
-    opts[:create][:Cmd] = cmd if cmd.length > 0
+    opts = options.merge(create: { tty: options[:transient] })
+    opts[:create][:Cmd] = cmd unless cmd.empty?
     exec(service) do |s|
       s.start(opts)
     end
