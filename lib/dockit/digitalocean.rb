@@ -20,7 +20,8 @@ class DO < Thor
                default: 'token'
 
   desc 'create', 'create droplet REMOTE'
-  option :size,   type: :string, desc: 'size for droplet',   default: '512mb'
+  option :image,  type: :string, desc: 'slug for image',     default: 'docker'
+  option :size,   type: :string, desc: 'size for droplet',   default: '1gb'
   option :region, type: :string, desc: 'region for droplet', default: 'nyc3'
   def create
     if find(options.remote)
@@ -32,9 +33,25 @@ class DO < Thor
                             name: options.remote,
                             region: options.region,
                             size: options[:size],
-                            image: 'docker',
+                            image: options[:image],
                             ssh_keys: client.ssh_keys.all.collect(&:id)))
-    say  [d.id, d.status, d.name].join(' ')
+    say [d.id, d.status, d.name].join(' ')
+  end
+
+  desc 'available', 'list available docker images'
+  option :all, type: :boolean, desc: 'list ALL available images', aliases: ['a']
+  def available
+    f = '%-20.20s %-25.25s %s'
+    say format(f, 'slug', 'name', 'regions')
+    say format(f, '_' * 20, '_' * 25, '_' * 30)
+
+    say(
+      client.images.all.select do |i|
+        i.slug && options.all || i.name =~ /^Docker/
+      end.map do |i|
+        format(f, i.slug, i.name, i.regions.join(','))
+      end.sort.join("\n")
+    )
   end
 
   desc 'list', 'list droplets'
