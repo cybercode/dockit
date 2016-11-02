@@ -1,6 +1,6 @@
 FROM cybercode/alpine-ruby:2.3
 
-RUN apk --update add docker
+RUN apk update && apk upgrade && apk add docker
 
 WORKDIR /app
 COPY . .
