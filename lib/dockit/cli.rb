@@ -264,6 +264,10 @@ class Default < Thor
   private
   GIT_CMD = 'git archive -o %s --format tar.gz --remote %s %s %s'.freeze
   def export(repos, branch, archive, args='')
+    if repos =~ /\A\./
+      repos = File.absolute_path(repos) # git 2.11.0 unhappy w/ '../..'
+    end
+
     cmd = GIT_CMD % [archive, repos, branch, args]
     say "#{cmd}\n", :blue if options.debug
 
