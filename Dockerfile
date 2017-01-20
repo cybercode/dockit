@@ -1,4 +1,9 @@
-FROM cybercode/alpine-ruby:2.3
+FROM alpine:3.5
+
+RUN apk update && apk upgrade && apk --update add docker \
+    ruby ruby-irb ruby-rake ruby-io-console ruby-bigdecimal ruby-json ruby-bundler \
+    libstdc++ tzdata bash ca-certificates \
+    &&  echo 'gem: --no-document' > /etc/gemrc
 
 RUN apk update && apk upgrade && apk add docker
 
