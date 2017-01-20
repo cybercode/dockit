@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name          = "dockit"
   s.version       = File.read("VERSION").chomp # file managed by version gem...
   s.authors       = ["Rick Frankel"]
-  s.email         = ["dockitk@rickster.com"]
+  s.email         = ["dockit@cybercode.nyc"]
 
   s.summary       = %q{A configuration manager and builder for docker projects.}
   s.description   = %q{Dockit is a builder for complex docker projects. Think scriptable docker-composer.}
