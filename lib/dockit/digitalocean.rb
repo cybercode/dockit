@@ -76,8 +76,8 @@ class DO < Thor
   end
 
   desc 'push [SERVICES]', 'push service(s) to digitalocean (default all)'
-  option :backup, type: :boolean, desc: "Backup (tag) current version before push",
-         aliases: ['b']
+  option :backup, type: :boolean,
+         desc: "Backup (tag) current version before push", aliases: ['b']
   option :tag, type: :string, desc: "tag name for backup", default: 'last'
   def push(*args)
     args = dockit.services.keys if args.empty?
@@ -89,19 +89,19 @@ class DO < Thor
         say ". #{k}: No image!", :red
         next
       end
-      name    = s.config.get(:build, :t)
+      name = s.config.get(:build, :t)
       unless name.present?
         say ". #{k}: not a local build", :red
         next
       end
-      id      = s.image.id
-      msg     =  "#{k}(#{id[0..11]}[#{name}]):"
+      id  = s.image.id
+      msg = "#{k}(#{id[0..11]}[#{name}]):"
       if ssh(options.remote, options.user,
              "docker images --no-trunc | grep #{id} > /dev/null")
         say ". #{msg} exists"
       else
         if options.backup
-          tag = "#{k}:#{options.tag}"
+          tag = "#{name}:#{options.tag}"
           say "#{msg} tagging as #{tag}"
           ssh(options.remote, options.user, "docker tag #{name} #{tag}")
         end
@@ -116,13 +116,12 @@ class DO < Thor
          desc: 'extra environment variables not defined in Dockit.yaml'
   def start(name)
     s     = service(name)
-    name  = s.name
     links = config(s, :run,    :Links, 'l')
     binds = config(s, :run,    :Binds, 'v')
 
-    env   = config(s, :create, :Env,   'e')
-    env   << (options[:vars]||{}).collect { |k,v| ['-e', "#{k}='#{v}'"]}
-    env   << ['-e', "ENV='#{options.env}'"]
+    env = config(s, :create, :Env, 'e')
+    env << (options[:vars] || {}).collect { |k, v| ['-e', "#{k}='#{v}'"] }
+    env << ['-e', "ENV='#{options.env}'"]
 
     cmd = ['docker', 'run', env, links, binds].join(' ')
     ssh(options.remote, options.user, cmd)
