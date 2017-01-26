@@ -26,7 +26,7 @@ module Dockit
       end
 
       opts['Image'] ||= image.id if image
-      opts['name']  ||= config.get(:build, :t).gsub(/[^a-zA-Z0-9_.-]/, '-')
+      opts['name']  ||= name
 
       run = merge_config(:run, stringify(options[:run]))
 
@@ -74,7 +74,9 @@ module Dockit
     end
 
     def name
-      n = config.get(:create, :name) || config.get(:build, :t).split(':')[0]
+      (
+        config.get(:create, :name) || config.get(:build, :t).split(':')[0]
+      ).gsub(/[^a-zA-Z0-9_.-]/, '-')
     end
 
     private

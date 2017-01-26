@@ -119,11 +119,11 @@ class Default < Thor
     end
   end
 
-  desc 'sh [SERVICE] [CMD]', 'run an interactive command (default "bash -l")'
+  desc 'sh [SERVICE] [CMD]', 'run an interactive command (default "sh -l")'
   def sh(service=nil, *cmd)
     exec(service) do |s|
-      cmd  = %w[bash -l] if cmd.length < 1
-      name = "sh-#{s.name}"
+      cmd  = %w[sh -l] if cmd.empty?
+      name = ['exec', cmd.first, s.name].join('-')
 
       # in case image has an entrypoint, use the cmd as the entrypoint
       (entrypoint, *cmd) = cmd
@@ -134,7 +134,7 @@ class Default < Thor
         create: {
           Entrypoint: [entrypoint],
           Cmd: cmd,
-          name: "sh-#{name}",
+          name: name,
           Tty: true,
           AttachStdin: true,
           AttachStdout: true,
