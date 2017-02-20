@@ -254,8 +254,9 @@ class Default < Thor
       say '-> repos.tar.gz', :green
       export(repos, treeish, 'repos.tar.gz')
 
-      say "Creating '.branch' tag file (#{options.branch})", :blue
-      File.write('.branch', "#{options.branch}\n")
+      hash = `git rev-parse #{options.branch}`.chomp
+      say "Creating '.branch' tag file (#{options.branch}:#{hash})", :blue
+      File.write('.branch', "#{options.branch}:#{hash}\n")
 
       s.build
     end
