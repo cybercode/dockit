@@ -28,14 +28,14 @@ class DO < Thor
       say  "Droplet #{options.remote} exists. Please destroy it first.", :red
       exit 1
     end
-    say "creating droplet: #{options.remote}"
+    say "creating droplet: #{options.remote}", :green
     d = client.droplets.create(DropletKit::Droplet.new(
                             name: options.remote,
                             region: options.region,
                             size: options[:size],
                             image: options[:image],
                             ssh_keys: client.ssh_keys.all.collect(&:id)))
-    say [d.id, d.status, d.name].join(' ')
+    say [d.id, d.status, d.name].join(' '), :blue
   end
 
   desc 'available', 'list available docker images'
@@ -98,14 +98,14 @@ class DO < Thor
       msg = "#{k}(#{id[0..11]}[#{name}]):"
       if ssh(options.remote, options.user,
              "docker images --no-trunc | grep #{id} > /dev/null")
-        say ". #{msg} exists"
+        say ". #{msg} exists", :blue
       else
         if options.backup
           tag = "#{name}:#{options.tag}"
-          say "#{msg} tagging as #{tag}"
+          say "#{msg} tagging as #{tag}", :green
           ssh(options.remote, options.user, "docker tag #{name} #{tag}")
         end
-        say "#{msg} pushing"
+        say "#{msg} pushing", :green
         ssh(options.remote, options.user, 'docker load', "docker save #{name}")
       end
     end
@@ -151,7 +151,7 @@ class DO < Thor
   def service(name)
     Dockit::Service.new(
       service_file(name),
-      locals: {env: options.env ? "-#{options.env}" : ''}.merge(options[:locals]||{}))
+      locals: {env: options.env || ''}.merge(options[:locals]||{}))
   end
 
   def service_file(name)

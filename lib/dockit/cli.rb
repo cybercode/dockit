@@ -179,32 +179,32 @@ class Default < Thor
     end
   end
 
-  desc 'push REGISTRY [SERVICE]', 'push image for SERVICE to REGSITRY'
+  desc 'push REGISTRY [SERVICE ...]', 'push image for SERVICE(s) to REGSITRY'
   option :force, type: :boolean, desc: 'overwrite current lastest version'
   option :tag,  desc: 'repos tag (defaults to "latest")', aliases: ['t']
-  def push(registry, service=nil)
-    exec(service) do |s|
+  def push(registry, *services)
+    exec(services) do |s|
       s.push(registry, options[:tag], options[:force])
     end
   end
 
-  desc 'pull REGISTRY [SERVICE]', 'pull image for SERVICE from REGSITRY'
+  desc 'pull REGISTRY [SERVICE ...]', 'pull image for SERVICE(s) from REGSITRY'
   option :force, type: :boolean, desc: 'overwrite current tagged version'
   option :tag,  desc: 'repos tag (defaults to "latest")', aliases: ['t']
-  def pull(registry, service=nil)
-    exec(service) do |s|
+  def pull(registry, *services)
+    exec(services) do |s|
       s.pull(registry, options[:tag], options[:force])
     end
   end
 
-  desc 'build [SERVICE]', "Build image from current directory or service name"
-  def build(service=nil)
-    exec(service) do |s|
+  desc 'build [SERVICE ...]', "Build image(s) from current directory or service name(s)"
+  def build(*services)
+    exec(services) do |s|
       s.build()
     end
   end
 
-  desc 'git-build', 'build from git repository'
+  desc 'git-build [SERVICE ...]', 'build image(s) for current directory or service(s) from git'
   option :branch, desc: '<tree-ish> git reference', default: GIT_BRANCH
   option :package, type: :boolean, desc: 'update package config export'
   option :tag, type: :boolean,
@@ -226,8 +226,8 @@ class Default < Thor
       branch, not ~master~.
   LONGDESC
 
-  def git_build(service=nil)
-    exec(service) do |s|
+  def git_build(*services)
+    exec(services) do |s|
       unless repos = s.config.get(:repos)
         say "'repos' not defined in config file. Exiting…", :red
         exit 1
@@ -282,18 +282,22 @@ class Default < Thor
     @@dockit ||= Dockit::Env.new(debug: options[:debug])
   end
 
-  def exec(service)
-    file = _file(service)
-    if file != DOCKIT_FILE
-      say "Processing #{service}"
-      # problem w/ path length for docker build, so change to local directory
-      Dir.chdir(File.dirname(file))
-    end
+  def exec(services)
+    services = [services] unless services.is_a?(Array)
+    services.push(nil) unless services.count.positive?
+    services.each do |service|
+      file = _file(service)
+      if file != DOCKIT_FILE
+        say "Processing #{service}", :blue
+        # problem w/ path length for docker build, so change to local directory
+        Dir.chdir(File.dirname(file))
+      end
 
-    locals = options[:locals]||{}
-    env = options[:env]
-    locals[:env] = env ? "-#{env}" : ""
-    yield Dockit::Service.new(locals: locals)
+      locals = options[:locals]||{}
+      locals[:env] = options[:env] || ''
+      yield Dockit::Service.new(locals: locals)
+
+    end
   end
 
   def _file(service)
