@@ -2,6 +2,7 @@ require 'docker'
 require 'yaml'
 require 'pathname'
 require 'version'
+require 'json'
 
 require 'dockit/config'
 require 'dockit/service'

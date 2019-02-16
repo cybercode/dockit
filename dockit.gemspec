@@ -19,14 +19,14 @@ Gem::Specification.new do |s|
   s.executables   = %w[dockit]
   s.require_paths = ["lib"]
 
-  s.add_development_dependency "bundler"   , "~> 1.9"
-  s.add_development_dependency "rake"      , "~> 10.4"
-  s.add_development_dependency "rspec"     , "~> 3.2"
-  s.add_development_dependency "simplecov" , "~> 0.10"
-  s.add_development_dependency "pry"       , "~> 0.10"
+  s.add_development_dependency "bundler"   , "~> 2.0"
+  s.add_development_dependency "rake"      , "~> 12.3"
+  s.add_development_dependency "rspec"     , "~> 3.8"
+  s.add_development_dependency "simplecov" , "~> 0.16"
+  s.add_development_dependency "pry"       , "~> 0.12"
 
-  s.add_dependency "thor", "~> 0.19"
-  s.add_dependency "dotenv", "~> 2.0"
-  s.add_dependency "docker-api", "~> 1.21"
-  s.add_dependency "version", "~> 1.0"
+  s.add_dependency "thor", "~> 0.20"
+  s.add_dependency "dotenv", "~> 2.6"
+  s.add_dependency "docker-api", "~> 1.34"
+  s.add_dependency "version", "~> 1.1"
 end
