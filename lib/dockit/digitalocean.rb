@@ -90,7 +90,7 @@ class DO < Thor
         next
       end
       name = s.config.get(:build, :t)
-      unless name.present?
+      if name.empty?
         say ". #{k}: not a local build", :red
         next
       end
